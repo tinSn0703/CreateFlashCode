@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreateFlashCode", "CreateFlashCode.csproj", "{AC338405-E14B-4F66-BBDB-E30079FBAECE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Setting", "..\Setting\Setting.csproj", "{DFB05B0E-121C-4CAE-99D3-7162C5FFA353}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC338405-E14B-4F66-BBDB-E30079FBAECE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC338405-E14B-4F66-BBDB-E30079FBAECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC338405-E14B-4F66-BBDB-E30079FBAECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC338405-E14B-4F66-BBDB-E30079FBAECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFB05B0E-121C-4CAE-99D3-7162C5FFA353}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFB05B0E-121C-4CAE-99D3-7162C5FFA353}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFB05B0E-121C-4CAE-99D3-7162C5FFA353}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFB05B0E-121C-4CAE-99D3-7162C5FFA353}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FB0A2600-C39D-4871-82D3-14F85088A3FD}
+	EndGlobalSection
+EndGlobal
