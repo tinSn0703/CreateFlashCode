@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <settings>
-  <CreateNvmCode NvmFilePath="C:\Users\nsowa.DKR\Downloads\P042D01000.txt" OutputDirectory="C:\Users\nsowa.DKR\Downloads">
-    <Commnad SendCommand="MFTX" RamCommand="K06" Comment="" />
+  <CreateNvmCode NvmFilePath="D:\Project\CreateFlashCode\TestFlashData.txt" OutputDirectory="">
+    <Commnad SendCommand="MFTX" RamCommand="K06" Comment="#Block" />
     <Adrress BeginWriteAddress="0" EndWriteAddress="65535" IsReverseAddress="true" MinWriteByteNum="0" MaxWriteByteNum="64" MaxWriteBlockNum="4" />
   </CreateNvmCode>
 </settings>

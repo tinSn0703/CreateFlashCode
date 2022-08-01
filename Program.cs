@@ -6,16 +6,37 @@ namespace CreateFlashCode
 	{
 		static void Main(string[] args)
 		{
-			var setting = new SettingCreateNvmCode();
-			var settingFileXml = new Setting.SettingFileXmlController();
-			//settingFileXml.Open(System.IO.Path.GetFullPath(settingFileXml.DefaultFileName));
-			settingFileXml.Open(@"D:\workspace\作業場所_業務改善\Project\CreateFlashCode\setting.xml");
-			//settingFileXml.ReadSetting(new SettingStreamXmlCreateFlashCode(setting));
-			setting.NvmFilePath = @"C:\Users\nsowa.DKR\Downloads\P042D01000.txt";
-			setting.OutputDirectory = System.IO.Path.GetDirectoryName(setting.NvmFilePath);
-			settingFileXml.WriteSetting(new SettingStreamXmlCreateFlashCode(setting));
-			settingFileXml.Save();
-			settingFileXml.Close();
+			var _setting = new SettingCreateNvmCode();
+			var _setting_file = new Setting.SettingFileXmlController();
+
+			_setting_file.Open((args.Length > 0) ? args[0] : System.IO.Path.GetFullPath(_setting_file.DefaultFileName));
+
+			try { _setting_file.ReadSetting(new SettingStreamXmlCreateFlashCode(_setting)); }
+			catch (System.Xml.XmlException e)
+			{
+				_setting_file.WriteSetting(new SettingStreamXmlCreateFlashCode(_setting));
+				_setting_file.Save();
+				_setting_file.Close();
+
+				Console.WriteLine(e.Message);
+				Console.WriteLine("設定ファイル[" + _setting_file.SettingFilePath + "]に、要素["　+ _setting.SettingName + "]が存在しませんでした。");
+				Console.WriteLine("設定ファイルに、要素[" + _setting.SettingName + "]を追加しました。設定を入力してください。");
+				return;
+			}
+			catch(Setting.InvalidSettingException e)
+			{
+				Console.WriteLine(e.Message);
+				Console.WriteLine("正しい形式の設定を入力してください。");
+				return;
+			}
+
+			var _app = new ActionCreateNvmCode();
+			var _result = _app.Action(_setting);
+			Console.WriteLine(_result);
+
+			_setting_file.WriteSetting(new SettingStreamXmlCreateFlashCode(_setting));
+			_setting_file.Save();
+			_setting_file.Close();
 		}
 	}
 }

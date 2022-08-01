@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace CreateFlashCode
 {
@@ -97,7 +98,7 @@ namespace CreateFlashCode
 		/// <summary>書き込みコマンドで一度に書き込めるアドレスの最小バイト数の範囲内であるか?</summary>
 		public bool IsMinWriteByteNumInRange(in short _num)
 		{
-			return ((MIN_WRITE_ADDRESS <= _num) && (_num <= MAX_WRITE_ADDRESS));
+			return ((MIN_WRITE_ADDRESS < _num) && (_num <= MAX_WRITE_ADDRESS));
 		}
 
 		//--------------------------------------------------------------------------------------------------//
@@ -109,13 +110,13 @@ namespace CreateFlashCode
 
 		//--------------------------------------------------------------------------------------------------//
 		/// <summary>書き込みコマンドを実行できる最大ブロック数が範囲内であるか?</summary>
-		public bool IsMaxWriteBlockNumInRange(in short _num)
+		public bool IsMaxWriteBlockNumInRange(in int _num)
 		{
-			return ((MIN_WRITE_ADDRESS < _num) && (_num <= MAX_WRITE_ADDRESS));
+			return ((MIN_WRITE_ADDRESS < _num) && (_num <= (MAX_WRITE_ADDRESS + 1)));
 		}
 
 		//--------------------------------------------------------------------------------------------------//
-		// public method
+		// private method
 		//--------------------------------------------------------------------------------------------------//
 		/// <summary>文字列が半角英数字のみで構成されているか?</summary>
 		/// <param name="_str"></param>
@@ -131,45 +132,50 @@ namespace CreateFlashCode
 		/// <summaryフォーム上の設定の要素名</summary>
 		public override string SettingName => "CreateNvmCode";
 
-		/// <summary>NVMデータファイルのパス</summary>
-		public string NvmFilePath { get => nvmFilePass; 
-			set
-			{
-				nvmFilePass = value;
-				NvmFileName = System.IO.Path.GetFileName(value);
-			}
-		}
-
 		/// <summary>NVMデータファイル名</summary>
 		public string NvmFileName { get; private set; }
 
+		[Description("NVMデータファイルへのパス"), Category("Appearance")]
+		/// <summary>NVMデータファイルのパス</summary>
+		public string NvmFilePath { get => nvmFilePass; set { NvmFileName = System.IO.Path.GetFileName(value); nvmFilePass = value; }}
+
+		[Description("生成した検査コードが書き込まれたファイルを保存するディレクトリ"), Category("Appearance")]
 		/// <summary>結果を保存するファイルへのディレクトリ</summary>
 		public string OutputDirectory { get; set; }
 
+		[Description("NVMデータ書き込みを行うRSコマンド 半角英数字のみであること"), Category("Appearance")]
 		/// <summary>NVMデータ書き込みを行うRSコマンド</summary>
 		public string SendCommand { get; set; }
 
+		[Description("NVMデータ書き込みを行うRAMモニタコマンド 半角英数字のみであること"), Category("Appearance")]
 		/// <summary>NVMデータ書き込みを行うRAMモニタコマンド</summary>
 		public string RamCommand { get; set; }
 
+		[Description("検査データ後に付加されるコメント 使用不可文字[,@]が含まれていないこと"), Category("Appearance")]
 		/// <summary>コメント</summary>
 		public string Comment { get; set; }
 
-		/// <summary>書き込みを行う先頭アドレス番号(0x0000~0xffffまで)</summary>
+		[Description("書き込みを行う先頭アドレス番号 0~65535(0x0000~0xFFFF)まで"), Category("Appearance")]
+		/// <summary>書き込みを行う先頭アドレス番号 0~65535(0x0000~0xFFFF)まで)</summary>
 		public int BeginWriteAddress { get; set; }
 
-		/// <summary>書き込みを行う末尾アドレス番号(0x0000~0xffffまで)</summary>
+		[Description("書き込みを行う末尾アドレス番号 0~65535(0x0000~0xFFFF)まで"), Category("Appearance")]
+		/// <summary>書き込みを行う末尾アドレス番号 0~65535(0x0000~0xFFFF)まで</summary>
 		public int EndWriteAddress { get; set; }
 
+		[Description("書き込みコマンドで一度に書き込めるアドレスの最小バイト数 1~65535まで"), Category("Appearance")]
 		/// <summary>書き込みコマンドで一度に書き込めるアドレスの最小バイト数</summary>
 		public short MinWriteByteNum { get; set; }
 
+		[Description("書き込みコマンドで一度に書き込めるアドレスの最大バイト数 1~65535まで"), Category("Appearance")]
 		/// <summary>書き込みコマンドで一度に書き込めるアドレスの最大バイト数</summary>
 		public short MaxWriteByteNum { get; set; }
 
+		[Description("書き込みコマンドを実行できる最大ブロック数 1~65536まで"), Category("Appearance")]
 		/// <summary>書き込みコマンドを実行できる最大ブロック数</summary>
-		public short MaxWriteBlockNum { get; set; }
+		public int MaxWriteBlockNum { get; set; }
 
+		[Description("コマンドのアドレス指定で、H/Lを反転させるか。 true/falseで指定する"), Category("Appearance")]
 		/// <summary>書き込みコマンドでのアドレス指定時、H/Lを反転させますか?</summary>
 		public bool IsReverseAddress { get; set; }
 

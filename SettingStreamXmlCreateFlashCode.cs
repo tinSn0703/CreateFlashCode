@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace CreateFlashCode
 {
@@ -77,7 +78,7 @@ namespace CreateFlashCode
 			_setting.NvmFilePath = (_setting.IsNvmFilePathExist(_value) ? _value : throw new Setting.InvalidSettingException(nameof(_setting.NvmFilePath), "File not found."));
 
 			_value = _element.Attribute(nameof(_setting.OutputDirectory)).Value;
-			_setting.OutputDirectory = (_setting.IsOutputDirectoryExist(_value) ? _value : "");
+			_setting.OutputDirectory = (_setting.IsOutputDirectoryExist(_value) ? _value : System.IO.Path.GetDirectoryName(_setting.NvmFilePath));
 
 			WriteCommandSetting(this._setting, _element.Element(SETTING_ELMENT_NAME_COMMAND));
 			WriteAddressSetting(this._setting, _element.Element(SETTING_ELMENT_NAME_ADDRESS));
@@ -114,9 +115,13 @@ namespace CreateFlashCode
 		{
 			if (_setting is null) throw new InvalidOperationException("[" + nameof(_setting) + "] is undefined.");
 
-			_element = new XElement(this.ElementName,
+			//var myAttribute = (DescriptionAttribute)TypeDescriptor.GetProperties(_setting)[nameof(_setting.NvmFilePath)].Attributes[typeof(DescriptionAttribute)];
+
+			_element = 
+				new XElement(this.ElementName,
 				new XAttribute(nameof(_setting.NvmFilePath), _setting.NvmFilePath),
 				new XAttribute(nameof(_setting.OutputDirectory), _setting.OutputDirectory),
+				new XComment("説明"),
 				new XElement(SETTING_ELMENT_NAME_COMMAND,
 					new XAttribute(nameof(_setting.SendCommand), _setting.SendCommand),
 					new XAttribute(nameof(_setting.RamCommand), _setting.RamCommand),
@@ -158,25 +163,29 @@ namespace CreateFlashCode
 		//--------------------------------------------------------------------------------------------------//
 		private void WriteAddressSetting(in SettingCreateNvmCode _setting, in XElement _element)
 		{
-			int _value_int = (int)_element.Attribute(nameof(_setting.BeginWriteAddress));
+			int _value_int = 0; short _value_short = 0;
+			_value_int = ReadAttributeAsInt(_element, nameof(_setting.BeginWriteAddress));
 			_setting.BeginWriteAddress = (_setting.IsBeginWriteAddressInRange(_value_int) ? _value_int : throw new Setting.InvalidSettingException(nameof(_setting.BeginWriteAddress)));
 
-			_value_int = (int)_element.Attribute(nameof(_setting.EndWriteAddress));
+			_value_int = ReadAttributeAsInt(_element, nameof(_setting.EndWriteAddress));
 			_setting.EndWriteAddress = (_setting.IsEndWriteAddressInRange(_value_int) ? _value_int : throw new Setting.InvalidSettingException(nameof(_setting.EndWriteAddress)));
 
-			short _value_short = (short)_element.Attribute(nameof(_setting.MinWriteByteNum));
+			_value_int = ReadAttributeAsInt(_element, nameof(_setting.MaxWriteBlockNum));
+			_setting.MaxWriteBlockNum = (_setting.IsMaxWriteBlockNumInRange(_value_int) ? _value_int : throw new Setting.InvalidSettingException(nameof(_setting.MaxWriteBlockNum)));
+
+			_value_short = ReadAttributeAsShort(_element, nameof(_setting.MinWriteByteNum));
 			_setting.MinWriteByteNum = (_setting.IsMinWriteByteNumInRange(_value_short) ? _value_short : throw new Setting.InvalidSettingException(nameof(_setting.MinWriteByteNum)));
 
-			_value_short = (short)_element.Attribute(nameof(_setting.MaxWriteByteNum));
+			_value_short = ReadAttributeAsShort(_element, nameof(_setting.MaxWriteByteNum));
 			_setting.MaxWriteByteNum = (_setting.IsMaxWriteByteNumInRange(_value_short) ? _value_short : throw new Setting.InvalidSettingException(nameof(_setting.MaxWriteByteNum)));
 
-			_value_short = (short)_element.Attribute(nameof(_setting.MaxWriteBlockNum));
-			_setting.MaxWriteBlockNum = (_setting.IsMaxWriteBlockNumInRange(_value_short) ? _value_short : throw new Setting.InvalidSettingException(nameof(_setting.MaxWriteBlockNum)));
-
-			bool _value_bool = (bool)_element.Attribute(nameof(_setting.IsReverseAddress));
+			_setting.IsReverseAddress = ReadAttributeAsBool(_element, nameof(_setting.IsReverseAddress));
 		}
 
 		//--------------------------------------------------------------------------------------------------//
+		/// <summary></summary>
+		/// <param name="_setting"></param>
+		/// <param name="_element"></param>
 		private void WriteCommandSetting(in SettingCreateNvmCode _setting, in XElement _element)
 		{
 			var _value = _element.Attribute(nameof(_setting.SendCommand)).Value;
@@ -187,6 +196,39 @@ namespace CreateFlashCode
 
 			_value = _element.Attribute(nameof(_setting.Comment)).Value;
 			_setting.Comment = (_setting.IsCommentCorrect(_value) ? _value : throw new Setting.InvalidSettingException(nameof(_setting.Comment)));
+		}
+
+		//--------------------------------------------------------------------------------------------------//
+		/// <summary>xml属性をint型で読む</summary>
+		/// <param name="_element">対象のxnl要素</param>
+		/// <param name="_name">属性名</param>
+		/// <returns>読み取った値</returns>
+		private int ReadAttributeAsInt(in XElement _element, in string _name)
+		{
+			try	{ return (int)_element.Attribute(_name); }
+			catch(FormatException e) { throw new Setting.InvalidSettingException("Failed to read [" + _name + "]. value = [" + _element.Attribute(_name).Value + "]", e); }
+		}
+
+		//--------------------------------------------------------------------------------------------------//
+		/// <summary>xml属性をshort型で読む</summary>
+		/// <param name="_element">対象のxnl要素</param>
+		/// <param name="_name">属性名</param>
+		/// <returns>読み取った値</returns>
+		private short ReadAttributeAsShort(in XElement _element, in string _name)
+		{
+			try { return (short)_element.Attribute(_name); }
+			catch (FormatException e) { throw new Setting.InvalidSettingException("Failed to read [" + _name + "]. value = [" + _element.Attribute(_name).Value + "]", e); }
+		}
+
+		//--------------------------------------------------------------------------------------------------//
+		/// <summary>xml属性をbool型で読む</summary>
+		/// <param name="_element">対象のxnl要素</param>
+		/// <param name="_name">属性名</param>
+		/// <returns>読み取った値</returns>
+		private bool ReadAttributeAsBool(in XElement _element, in string _name)
+		{
+			try { return (bool)_element.Attribute(_name); }
+			catch (FormatException e) { throw new Setting.InvalidSettingException("Failed to read [" + _name + "]. value = [" + _element.Attribute(_name).Value + "]", e); }
 		}
 
 		//--------------------------------------------------------------------------------------------------//
