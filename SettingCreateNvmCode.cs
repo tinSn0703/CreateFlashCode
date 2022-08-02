@@ -31,7 +31,7 @@ namespace CreateFlashCode
 			this.Comment = "[Flash] write";
 			this.BeginWriteAddress = MIN_WRITE_ADDRESS;
 			this.EndWriteAddress = MAX_WRITE_ADDRESS;
-			this.MinWriteByteNum = 0;
+			this.MinWriteByteNum = 1;
 			this.MaxWriteByteNum = 64;
 			this.MaxWriteBlockNum = 4;
 			this.IsReverseAddress = true;

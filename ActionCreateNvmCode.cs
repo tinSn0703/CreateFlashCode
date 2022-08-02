@@ -173,6 +173,11 @@ namespace CreateFlashCode
 		}
 
 		//--------------------------------------------------------------------------------------------------//
+		/// <summary></summary>
+		/// <param name="_setting"></param>
+		/// <param name="_listBlockAddress"></param>
+		/// <param name="_listFlashData"></param>
+		/// <returns></returns>
 		private List<string> Create(in SettingCreateNvmCode _setting, in List<int> _listBlockAddress, in List<FlashData> _listFlashData)
 		{
 			var _listWriteCode = new List<string>();
@@ -181,29 +186,36 @@ namespace CreateFlashCode
 
 			for (int i = 0, j = 0; (i < _listFlashData.Count()) && (_listFlashData[i].Addr <= _setting.EndWriteAddress); i++)
 			{
-				if (_listFlashData[i].Addr < _setting.BeginWriteAddress) continue;
+				if (_listFlashData[i].Addr < _setting.BeginWriteAddress) continue; //書き込み下限アドレス以下のFlashデータをスキップ
 
-				string _addrStr = (_listFlashData[i].Addr / _setting.MinWriteByteNum).ToString("X4"); //
+				string _addrStr = (_listFlashData[i].Addr / _setting.MinWriteByteNum).ToString("X4"); //アドレスを16進数へ変換する(変換時、送信コマンドの最小バイト数で割る)
 				string _addrStrH = _addrStr.Substring(ADDR_H_SIDE_CHAR, SPLIT_ADDR_DIGITS), _addrStrL = _addrStr.Substring(ADDR_L_SIDE_CHAR, SPLIT_ADDR_DIGITS);
-				string _code = _setting.IsReverseAddress ? _addrStrL + _addrStrH : _addrStrH + _addrStrL;
+				string _code = _setting.IsReverseAddress ? _addrStrL + _addrStrH : _addrStrH + _addrStrL; //書き込みコードへ、アドレスを設定する(設定によって、H/Lの順序を変える)
 
-				int _beforeAddr = _listFlashData[i].Addr - 1;
-
-				for (int _countByte = 0, _countBlock = 0; 
-					(i < _listFlashData.Count()) && (_countByte < _setting.MaxWriteByteNum) && (_countBlock < _setting.MaxWriteBlockNum) && (_listFlashData[i].Addr == _beforeAddr + 1) && (_listFlashData[i].Addr <= _setting.EndWriteAddress);
+				for (
+					int _countByte = 0, _countBlock = (_listWriteCode.Count < 1 ? 0 : 1), //バイト数カウント、ブロック数カウントの初期化。初期以降は、ブロック数カウントの初期値を1にする
+					_beforeAddr = _listFlashData[i].Addr - 1; //前回ループで参照していたFlashデータのアドレス
+					(i < _listFlashData.Count()) &&  (_listFlashData[i].Addr <= _setting.EndWriteAddress); //Flashデータ末尾、もしくは書き込み上限アドレスに到達した際、ループ終了。次の書き込みコードへ移る
 					_countByte++, i++)
 				{
-					if (_listBlockAddress[j] == _listFlashData[i].Addr)
+					if (_listBlockAddress[j] == _listFlashData[i].Addr) //Block開始アドレス
 					{
 						_countBlock++;
 						if (j < (_listBlockAddress.Count - 1)) j++;
+					}
+					
+					//書き込みバイト数上限、ブロック数上限に到達。もしくは、書き込みアドレス範囲が変わったため、ループ終了。次の書き込みコードへ移る
+					if ((_countByte >= _setting.MaxWriteByteNum) || (_countBlock >= _setting.MaxWriteBlockNum) || (_listFlashData[i].Addr != (_beforeAddr + 1)))
+					{
+						i--; //次行の書き込みコードの範囲に突入しているため、一つ前のデータに戻す
+						break;
 					}
 
 					_code += _listFlashData[i].Data;
 					_beforeAddr = _listFlashData[i].Addr;
 				}
-
-				_listWriteCode.Add(_commandCode + _code + _commentCode);
+				
+				_listWriteCode.Add(_commandCode + _code + _commentCode); //書き込みコードを作成
 			}
 
 			return _listWriteCode;
